@@ -1,0 +1,69 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Barbershop {
+  id String @id @default(uuid())
+  name String
+  description String
+  address String
+  region String[]
+  barbers Barber[]
+  reviews   Review[]
+}
+
+model Barber {
+  id String @id @default(uuid())
+  name String
+  bio String
+  speciality String[]
+  region String[]
+  belongsToID String
+  belongsTo Barbershop @relation(fields: [belongsToID], references: [id])
+  reservations Reservation[]
+}
+
+model User {
+  id        String @id @default(uuid())
+  username  String    @unique
+  avatar  String?
+  region String[]
+  hairType String[]
+  reviews   Review[]
+  reservations Reservation[]
+}
+
+model Review {
+  id            Int      @id @default(autoincrement())
+  content       String
+  rating        Int
+  user          User     @relation(fields: [userId], references: [id])
+  userId        String
+  barbershop    Barbershop   @relation(fields: [barbershopId], references: [id])
+  barbershopId  String
+}
+
+enum RESERVATION_STATUS {
+  PENDING
+  ACCEEPTED
+  REJECTED
+}
+
+model Reservation {
+  id           Int           @id @default(autoincrement())
+  start        DateTime
+  end          DateTime
+  status  RESERVATION_STATUS @default(PENDING)
+  user         User          @relation(fields: [userId], references: [id])
+  userId       String
+  barber       Barber        @relation(fields: [barberId], references: [id])
+  barberId     String
+}
